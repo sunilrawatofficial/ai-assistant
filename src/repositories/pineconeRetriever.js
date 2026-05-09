@@ -7,26 +7,41 @@ const {
 
 async function retrieveFromPinecone(question) {
   const questionEmbedding = (await createEmbeddings([question]))[0]?.embedding;
+
   if (!questionEmbedding) {
     throw new Error("Failed to generate embedding for question");
   }
 
   const queryResult = await pineconeIndex.query({
     vector: questionEmbedding,
-    topK: 2,
+    topK: 5,
     includeMetadata: true,
     namespace: PINECONE_NAMESPACE,
   });
 
-  const bestMatch = queryResult?.matches?.find(
-    (match) => match.score >= SIMILARITY_THRESHOLD
+  console.log("queryResult", JSON.stringify(queryResult, null, 2));
+
+  // Get all relevant matches instead of only first match
+  const relevantMatches = queryResult?.matches?.filter(
+    (match) =>
+      match.score >= SIMILARITY_THRESHOLD &&
+      match?.metadata?.text
   );
 
-  if (!bestMatch) {
+  if (!relevantMatches?.length) {
     return { context: "", found: false };
   }
 
-  return { context: bestMatch?.metadata?.text || "", found: true };
+  // Combine multiple contexts
+  const context = relevantMatches
+    .slice(0, 3)
+    .map((match) => match.metadata.text)
+    .join("\n\n");
+
+  return {
+    context,
+    found: true,
+  };
 }
 
 module.exports = { retrieveFromPinecone };

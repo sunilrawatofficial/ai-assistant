@@ -4,7 +4,7 @@ const { generateAnswer } = require("../services/llmService");
 async function answerRagQuestion(question) {
   const { context, found } = await retrieveContext(question);
   if (!found) {
-    return { answer: "Not in context", context: "" };
+    return { answer: "I can only answer questions related to Sunil Rawat's profile, skills, experience, and projects.", context: "" };
   }
 
   const answer = await generateAnswer({ question, context });
