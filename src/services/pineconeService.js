@@ -1,5 +1,5 @@
 const { pineconeIndex } = require("../config/pinecone");
-const { createEmbeddings } = require("../services/embeddingService");
+const { createEmbeddings } = require("./embeddingService");
 const { extractTextFromPDF, chunkText } = require("../utils/pdf");
 const { PINECONE_NAMESPACE } = require("../config/constants");
 

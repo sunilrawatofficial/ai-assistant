@@ -19,8 +19,6 @@ async function retrieveFromPinecone(question) {
     namespace: PINECONE_NAMESPACE,
   });
 
-  console.log("queryResult", JSON.stringify(queryResult, null, 2));
-
   // Get all relevant matches instead of only first match
   const relevantMatches = queryResult?.matches?.filter(
     (match) =>
