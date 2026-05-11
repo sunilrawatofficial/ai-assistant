@@ -1,5 +1,5 @@
 const { pineconeIndex } = require("../config/pinecone");
-const { createEmbeddings } = require("../services/embeddingService");
+const { createEmbeddings } = require("../services/ai/llmService");
 const {
   PINECONE_NAMESPACE,
   SIMILARITY_THRESHOLD,

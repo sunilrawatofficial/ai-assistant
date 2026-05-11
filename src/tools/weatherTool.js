@@ -1,4 +1,4 @@
-const { fetchWeather } = require("../../services/weatherService");
+const { fetchWeather } = require("../services/integrations/weatherService");
 
 async function getWeatherInfo(query) {
    //Simple city extraction

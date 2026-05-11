@@ -1,4 +1,4 @@
-const { processAgentQuery } = require("../services/agentService");
+const { processAgentQuery } = require("../services/ai/agentService");
 
 
 async function askAgentQuestion(assistantType, question) {

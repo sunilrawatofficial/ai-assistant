@@ -1,5 +1,5 @@
-const { retrieveFromLocal } = require("../repositories/localRetriever");
-const { retrieveFromPinecone } = require("../repositories/pineconeRetriever");
+const { retrieveFromLocal } = require("../../repositories/localContextRepository");
+const { retrieveFromPinecone } = require("../../repositories/pineconeContextRepository");
 
 async function retrieveContext(question) {
   if (process.env.USE_PINECONE === "true") {

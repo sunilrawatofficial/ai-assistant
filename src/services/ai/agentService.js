@@ -1,7 +1,7 @@
 const { generateChatCompletion } = require("./llmService");
-const { assistants } = require("../assistants");
-const { searchResume } = require("../tools/active/resumeTool");
-const { getWeatherInfo } = require("../tools/active/weatherTool");
+const { assistants } = require("../../assistants");
+const { searchResume } = require("../../tools/resumeTool");
+const { getWeatherInfo } = require("../../tools/weatherTool");
 
 const toolDefinitions = [
    {

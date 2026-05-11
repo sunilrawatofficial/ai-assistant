@@ -1,4 +1,4 @@
-const { retrieveContext } = require("../../services/retrievalService");
+const { retrieveContext } = require("../services/ai/retrievalService");
 
 async function searchResume(query) {
   const { context, found } = await retrieveContext(query);

@@ -1,6 +1,6 @@
 const { documents } = require("../data/documents");
 const { cosineSimilarity } = require("../utils/similarity");
-const { createEmbeddings, getEmbeddings } = require("../services/embeddingService");
+const { createEmbeddings, getEmbeddings } = require("../services/ai/llmService");
 const { SIMILARITY_THRESHOLD } = require("../config/constants");
 
 async function retrieveFromLocal(question) {
