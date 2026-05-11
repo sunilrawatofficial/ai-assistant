@@ -1,78 +1,115 @@
-const openai = require("../config/openai");
-const { CHAT_MODEL } = require("../config/constants");
-const { tools } = require("../services/toolDefinitions");
+const { generateChatCompletion } = require("./llmService");
+const { assistants } = require("../assistants");
 const { searchResume } = require("../tools/active/resumeTool");
 const { getWeatherInfo } = require("../tools/active/weatherTool");
-const { generateChatCompletion } = require("./llmService");
 
-const { ASSISTANT_PROMPT } = require("../prompts/assistantPrompt");
-const { RESUME_PROMPT } = require("../prompts/resumePrompt");
-const { WEATHER_PROMPT } = require("../prompts/weatherPrompt");
+const toolDefinitions = [
+   {
+      type: "function",
+      function: {
+         name: "searchResume",
+         description: "Search Sunil's resume information.",
+         parameters: {
+            type: "object",
+            properties: {
+               query: {
+                  type: "string",
+               },
+            },
+            required: ["query"],
+         },
+      },
+   },
+   {
+      type: "function",
+      function: {
+         name: "getWeatherInfo",
+         description: "Get current weather information.",
+         parameters: {
+            type: "object",
+            properties: {
+               city: {
+                  type: "string",
+               },
+            },
+            required: ["city"],
+         },
+      },
+   }
+];
 
-async function processAgentQuery(userQuery) {
-   // STEP 1: Ask OpenAI if tool is needed
+const toolRegistry = {
+   searchResume,
+   getWeatherInfo
+};
+
+async function processAgentQuery({ assistantType, question }) {
+
+   // STEP 1
+   const assistant = assistants[assistantType];
+
+   if (!assistant) {
+      throw new Error("Invalid assistant type");
+   }
+
+   // STEP 2
+   const allowedTools = toolDefinitions.filter((tool) =>
+      assistant.tools.includes(tool.function.name),
+   );
+
+   // STEP 3
    const message = await generateChatCompletion({
       messages: [
          {
             role: "system",
-            content: ASSISTANT_PROMPT,
+            content: assistant.prompt,
          },
+
          {
             role: "user",
-            content: userQuery,
+            content: question,
          },
       ],
-      tools,
+
+      tools: allowedTools,
    });
 
-   // STEP 2: Detect tool calls
-   if (message.tool_calls?.length) {
-      const toolCall = message.tool_calls[0];
-      const toolName = toolCall.function.name;
-      const args = JSON.parse(toolCall.function.arguments);
-      console.log("[tool name] =>", toolName);
-      console.log("[tool args] =>", args);
-      let toolResult = "";
-      let finalPrompt;
-      // STEP 3: Execute tool
-      switch (toolName) {
-         case "searchResume":
-            toolResult = await searchResume(args.query);
-            finalPrompt = RESUME_PROMPT;
-            break;
-
-         case "getWeatherInfo":
-            toolResult = await getWeatherInfo(args.city);
-            finalPrompt = WEATHER_PROMPT;
-            break;
-
-         default:
-            toolResult = "Unknown tool";
-      }
-
-      // STEP 4: Send tool result back to LLM
-      const finalResponse = await generateChatCompletion({
-         messages: [{
-               role: "system",
-               content: finalPrompt,
-            },{
-               role: "user",
-               content: userQuery,
-            },
-            message,
-            {
-               role: "tool",
-               tool_call_id: toolCall.id,
-               content: JSON.stringify(toolResult),
-            },
-         ],
-      });
-
-      return finalResponse.content;
+   // STEP 4
+   if (!message.tool_calls?.length) {
+      return message.content;
    }
 
-   // STEP 5: If no tool needed
-   return message.content;
+   const toolCall = message.tool_calls[0];
+   const toolName = toolCall.function.name;
+   const args = JSON.parse(toolCall.function.arguments);
+
+   // STEP 5
+   const toolFunction = toolRegistry[toolName];
+
+   const toolResult = await toolFunction(Object.values(args)[0]);
+
+   // STEP 6
+   const finalMessage = await generateChatCompletion({
+      messages: [
+         {
+            role: "system",
+            content: assistant.prompt,
+         },
+
+         {
+            role: "user",
+            content: `Question:
+             ${question}
+
+             Tool Result:
+             ${JSON.stringify(toolResult)}`,
+         },
+      ],
+   });
+
+   return finalMessage.content;
 }
 
-module.exports = { processAgentQuery };
+module.exports = {
+   processAgentQuery,
+};
