@@ -1,13 +1,13 @@
 const { generateChatCompletion } = require("./llmService");
 const { assistants } = require("../../assistants");
-const { searchResume } = require("../../tools/resumeTool");
+const { getPortfolioInfo } = require("../../tools/portfolioTool");
 const { getWeatherInfo } = require("../../tools/weatherTool");
 
 const toolDefinitions = [
    {
       type: "function",
       function: {
-         name: "searchResume",
+         name: "getPortfolioInfo",
          description: "Search Sunil's resume information.",
          parameters: {
             type: "object",
@@ -38,15 +38,13 @@ const toolDefinitions = [
    }
 ];
 
-const toolRegistry = {
-   searchResume,
-   getWeatherInfo
-};
+const toolRegistry = { getPortfolioInfo, getWeatherInfo };
 
 async function processAgentQuery({ assistantType, question }) {
-
+   console.log("[assistantType received]", assistantType);
    // STEP 1
    const assistant = assistants[assistantType];
+   console.log("[assistant found tools]", assistant.tools);
 
    if (!assistant) {
       throw new Error("Invalid assistant type");

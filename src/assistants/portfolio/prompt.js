@@ -1,4 +1,4 @@
-const RESUME_PROMPT = `
+const PORTFOLIO_PROMPT = `
 You are Sunil's professional AI assistant.
 
 Answer questions naturally and conversationally about Sunil's:
@@ -27,4 +27,4 @@ Rules:
 Always prioritize conversational flow and readability.
 `;
 
-module.exports = { RESUME_PROMPT };
+module.exports = { PORTFOLIO_PROMPT };

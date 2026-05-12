@@ -1,6 +1,6 @@
 const { retrieveContext } = require("../services/ai/retrievalService");
 
-async function searchResume(query) {
+async function getPortfolioInfo(query) {
   const { context, found } = await retrieveContext(query);
 
   if (!found) return "No relevant information found.";
@@ -8,4 +8,4 @@ async function searchResume(query) {
   return context;
 }
 
-module.exports = { searchResume };
+module.exports = { getPortfolioInfo };

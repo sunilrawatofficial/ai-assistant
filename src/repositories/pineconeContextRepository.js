@@ -1,17 +1,12 @@
 const { pineconeIndex } = require("../config/pinecone");
-const { createEmbeddings } = require("../services/ai/llmService");
-const {
-  PINECONE_NAMESPACE,
-  SIMILARITY_THRESHOLD,
-} = require("../config/constants");
+const { PINECONE_NAMESPACE, SIMILARITY_THRESHOLD } = require("../config/constants");
 
-async function retrieveFromPinecone(question) {
-  const questionEmbedding = (await createEmbeddings([question]))[0]?.embedding;
+async function retrieveFromPinecone(questionEmbedding) {
 
   if (!questionEmbedding) {
     throw new Error("Failed to generate embedding for question");
   }
-
+  
   const queryResult = await pineconeIndex.query({
     vector: questionEmbedding,
     topK: 5,
@@ -36,10 +31,7 @@ async function retrieveFromPinecone(question) {
     .map((match) => match.metadata.text)
     .join("\n\n");
 
-  return {
-    context,
-    found: true,
-  };
+  return { context, found: true };
 }
 
 module.exports = { retrieveFromPinecone };

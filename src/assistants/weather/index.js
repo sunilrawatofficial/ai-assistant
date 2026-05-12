@@ -1,4 +1,4 @@
-const { WEATHER_PROMPT } = require("../prompts/weatherPrompt");
+const { WEATHER_PROMPT } = require("./prompt");
 
 module.exports = {
    prompt: WEATHER_PROMPT,

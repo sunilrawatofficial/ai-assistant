@@ -1,5 +1,5 @@
-const portfolioAssistant = require("./portfolioAssistant");
-const weatherAssistant = require("./weatherAssistant");
+const portfolioAssistant = require("./portfolio");
+const weatherAssistant = require("./weather");
 
 const assistants = {
    portfolio: portfolioAssistant,

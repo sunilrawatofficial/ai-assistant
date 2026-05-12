@@ -1,12 +1,9 @@
 const { documents } = require("../data/documents");
 const { cosineSimilarity } = require("../utils/similarity");
-const { createEmbeddings, getEmbeddings } = require("../services/ai/llmService");
+const { getEmbeddings } = require("../services/ai/llmService");
 const { SIMILARITY_THRESHOLD } = require("../config/constants");
 
-async function retrieveFromLocal(question) {
-  const questionEmbedding = (await createEmbeddings([question]))[0]?.embedding;
-  const documentEmbeddings = getEmbeddings();
-
+async function retrieveFromLocal(questionEmbedding, documentEmbeddings) {
   if (!questionEmbedding || !documentEmbeddings.length) {
     throw new Error("Embeddings not initialized");
   }
