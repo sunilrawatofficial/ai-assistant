@@ -38,7 +38,7 @@ const toolDefinitions = [
    }
 ];
 
-const toolRegistry = { getPortfolioInfo, getWeatherInfo };
+const toolFunctionsRegistry = { getPortfolioInfo, getWeatherInfo };
 
 async function processAgentQuery({ assistantType, question }) {
    console.log("[assistantType received]", assistantType);
@@ -82,7 +82,7 @@ async function processAgentQuery({ assistantType, question }) {
    const args = JSON.parse(toolCall.function.arguments);
 
    // STEP 5
-   const toolFunction = toolRegistry[toolName];
+   const toolFunction = toolFunctionsRegistry[toolName];
 
    const toolResult = await toolFunction(Object.values(args)[0]);
 
