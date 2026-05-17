@@ -16,7 +16,7 @@ Client → Express (app.js)
 processAgentQuery({ assistantType, question })
   → assistants[assistantType]
   → generateChatCompletion (llmService) — may return tool_calls
-  → toolRegistry[toolName] (tools/*.js)
+  → assistant.toolHandlers[toolName] (assistants/<name>/getX.js)
   → second completion with tool result → final content
 ```
 
@@ -28,7 +28,7 @@ src/
 ├── services/ai/          # llmService, retrievalService, agentService
 ├── services/integrations/# pineconeIngestionService, weatherService
 ├── repositories/         # local | pinecone
-├── tools/, assistants/, data/documents.js, utils/
+├── assistants/ (prompt + tool handlers per assistant), data/documents.js, utils/
 ```
 
 ## Retrieval dual mode
@@ -65,9 +65,8 @@ src/
 
 ## Add assistant (checklist)
 
-1. `src/assistants/<name>/prompt.js` + `index.js` → `assistants/index.js`
-2. `src/tools/<name>Tool.js`
-3. `agentService.js`: `toolDefinitions` + `toolRegistry`
+1. `src/assistants/<name>/prompt.js` + `getX.js` + `index.js` (`toolDefinitions`, `toolHandlers`) → `assistants/index.js`
+2. `agentService.js` resolves tools from the assistant module (no global tool registry)
 
 ## Not in repo
 

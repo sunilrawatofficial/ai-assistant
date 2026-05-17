@@ -1,6 +1,7 @@
-const { retrieveContext } = require("../services/ai/retrievalService");
+const { retrieveContext } = require("../../services/ai/retrievalService");
 
 async function getPortfolioInfo(query) {
+  console.log("[query]", query);
   const { context, found } = await retrieveContext(query);
 
   if (!found) return "No relevant information found.";

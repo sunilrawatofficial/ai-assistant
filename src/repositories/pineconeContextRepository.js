@@ -27,7 +27,7 @@ async function retrieveFromPinecone(questionEmbedding) {
 
   // Combine multiple contexts
   const context = relevantMatches
-    .slice(0, 3)
+    .slice(0, 5)
     .map((match) => match.metadata.text)
     .join("\n\n");
 

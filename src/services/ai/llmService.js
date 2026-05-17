@@ -27,6 +27,7 @@ async function generateChatCompletion({ messages, tools }) {
       model: CHAT_MODEL,
       messages,
       tools,
+      temperature: 0
    });
    return response.choices[0].message;
 }
