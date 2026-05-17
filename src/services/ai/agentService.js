@@ -1,70 +1,121 @@
-const { generateChatCompletion } = require("./llmService");
+const {
+   generateChatCompletion,
+   streamChatCompletion,
+} = require("./llmService");
 const { assistants } = require("../../assistants");
 
-async function processAgentQuery({ assistantType, question }) {
-  console.log("[assistantType received]", assistantType);
-  const assistant = assistants[assistantType];
-  console.log("[assistant found tools]", assistant?.tools);
+function getAssistant(assistantType) {
+   const assistant = assistants[assistantType];
+   if (!assistant) {
+      throw new Error("Invalid assistant type");
+   }
+   return assistant;
+}
 
-  if (!assistant) {
-    throw new Error("Invalid assistant type");
-  }
+function buildQuestionMessages(assistant, question) {
+   return [
+      { role: "system", content: assistant.prompt },
+      { role: "user", content: question },
+   ];
+}
 
-  const allowedTools = assistant.toolDefinitions || [];
-
-  const message = await generateChatCompletion({
-    messages: [
+function buildMessagesWithToolResult(assistant, question, toolResult) {
+   return [
+      { role: "system", content: assistant.prompt },
       {
-        role: "system",
-        content: assistant.prompt,
-      },
-      {
-        role: "user",
-        content: question,
-      },
-    ],
-    tools: allowedTools,
-  });
-
-  console.log("[message]", JSON.stringify(message, null, 2));
-  if (!message.tool_calls?.length) {
-    return message.content;
-  }
-
-  const toolCall = message.tool_calls[0];
-  const toolName = toolCall.function.name;
-  const args = JSON.parse(toolCall.function.arguments);
-
-  const toolFunction = assistant.toolHandlers?.[toolName];
-  if (!toolFunction) {
-    throw new Error(`Unknown tool: ${toolName}`);
-  }
-
-  console.log("[tool args]", args);
-  const toolResult = await toolFunction(Object.values(args)[0]);
-  console.log("[tool result]", toolResult);
-
-
-  const finalMessage = await generateChatCompletion({
-    messages: [
-      {
-        role: "system",
-        content: assistant.prompt,
-      },
-      {
-        role: "user",
-        content: `Question:
-             ${question}
+         role: "user",
+         content: `Question: ${question}
 
              Tool Result:
              ${JSON.stringify(toolResult)}`,
       },
-    ],
-  });
+   ];
+}
 
-  return finalMessage.content;
+/** First LLM call — returns whether a tool is required and optional direct reply. */
+async function decideIfToolIsNeeded(assistant, question) {
+   const message = await generateChatCompletion({
+      messages: buildQuestionMessages(assistant, question),
+      tools: assistant.toolDefinitions || [],
+   });
+
+   if (!message.tool_calls?.length) {
+      return { needsTool: false, directAnswer: message.content };
+   }
+
+   return { needsTool: true, toolCall: message.tool_calls[0] };
+}
+
+/** Runs the tool handler and builds messages for the final answer. */
+async function runToolAndBuildMessages(assistant, toolCall, question) {
+   const toolName = toolCall.function.name;
+   const args = JSON.parse(toolCall.function.arguments);
+   const toolHandler = assistant.toolHandlers?.[toolName];
+
+   if (!toolHandler) {
+      throw new Error(`Unknown tool: ${toolName}`);
+   }
+
+   console.log("[tool args]", args);
+   const toolResult = await toolHandler(Object.values(args)[0]);
+
+   return buildMessagesWithToolResult(assistant, question, toolResult);
+}
+
+async function processAgentQuery({ assistantType, question }) {
+   const assistant = getAssistant(assistantType);
+   const decision = await decideIfToolIsNeeded(assistant, question);
+
+   if (!decision.needsTool) {
+      return decision.directAnswer ?? "";
+   }
+
+   const messagesWithToolResult = await runToolAndBuildMessages(
+      assistant,
+      decision.toolCall,
+      question,
+   );
+   const finalMessage = await generateChatCompletion({
+      messages: messagesWithToolResult,
+   });
+   return finalMessage.content;
+}
+
+/**
+ * Streaming: yields SSE events for the route.
+ *   { status: "thinking" | "searching" | "generating" }
+ *   { token: "..." }
+ */
+async function* streamAgentEvents({ assistantType, question }) {
+   const assistant = getAssistant(assistantType);
+
+   yield { status: "thinking" };
+
+   const decision = await decideIfToolIsNeeded(assistant, question);
+
+   if (!decision.needsTool) {
+      yield { status: "generating" };
+      if (decision.directAnswer) {
+         yield { token: decision.directAnswer };
+      }
+      return;
+   }
+
+   yield { status: "searching" };
+   const answerMessages = await runToolAndBuildMessages(
+      assistant,
+      decision.toolCall,
+      question,
+   );
+
+   yield { status: "generating" };
+
+   for await (const token of streamChatCompletion({ messages: answerMessages })) {
+      yield { token };
+   }
 }
 
 module.exports = {
-  processAgentQuery,
+   processAgentQuery,
+   streamAgentEvents,
 };
