@@ -26,7 +26,7 @@ async function processAgentQuery({ assistantType, question }) {
     tools: allowedTools,
   });
 
-  console.log("[message]", message);
+  console.log("[message]", JSON.stringify(message, null, 2));
   if (!message.tool_calls?.length) {
     return message.content;
   }
@@ -42,6 +42,8 @@ async function processAgentQuery({ assistantType, question }) {
 
   console.log("[tool args]", args);
   const toolResult = await toolFunction(Object.values(args)[0]);
+  console.log("[tool result]", toolResult);
+
 
   const finalMessage = await generateChatCompletion({
     messages: [
