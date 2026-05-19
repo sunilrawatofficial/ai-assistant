@@ -10,7 +10,8 @@ const documents = [
   "Backend Stack: Node.js, Express.js, OpenAI SDK, Pinecone, Multer, dotenv, CORS. Uses JavaScript CommonJS with service-first backend organization.",
   "AI Product Mindset: Designs assistants for practical use cases like portfolio Q&A and weather/resume tools, with emphasis on relevance, reliability, and future extensibility.",
   "Collaboration: Works iteratively with feedback, improves naming conventions, and balances immediate feature needs with long-term maintainability.",
-  "Future Roadmap: Domain-aware retrieval namespaces, stronger tool-call validation, better retrieval observability, and cleaner AI service boundaries for scaling features."
+  "Future Roadmap: Domain-aware retrieval namespaces, stronger tool-call validation, better retrieval observability, and cleaner AI service boundaries for scaling features.",
+  "Contact Information: Sunil Rawat public portfolio contact — Email: sunilrawatofficial@gmail.com, Phone: +91 7503095374, Location: India, Website: sunilrawatcode.com, LinkedIn: https://www.linkedin.com/in/sunil-rawat-0059861ab/"
 ];
 
 module.exports = { documents };
