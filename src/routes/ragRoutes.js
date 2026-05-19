@@ -1,40 +1,46 @@
 const express = require("express");
 const {
-  answerRagQuestion,
-  answerQuestion,
+  askAgentQuestion,
+  createAgentEventStream,
 } = require("../controllers/ragController");
 
 const router = express.Router();
 
+function writeSse(res, payload) {
+  res.write(`data: ${JSON.stringify(payload)}\n\n`);
+}
+
 router.post("/rag", async (req, res) => {
   try {
-    const { question } = req.body;
+    const { assistantType, question, stream } = req.body;
 
-    if (!question) {
-      return res.status(400).json({ error: "Question is required" });
+    if (!question || !assistantType) {
+      return res.status(400).json({ error: "Question and assistantType are required" });
     }
 
-    const result = await answerRagQuestion(question);
-    res.json(result);
+    if (!stream) {
+      const result = await askAgentQuestion(assistantType, question);
+      return res.json(result);
+    }
+
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+    res.flushHeaders?.();
+
+    for await (const event of createAgentEventStream(assistantType, question)) {
+      writeSse(res, event);
+    }
+
+    writeSse(res, { done: true });
+    res.end();
   } catch (err) {
     console.error(err);
+    if (res.headersSent) {
+      writeSse(res, { error: "RAG failed" });
+      return res.end();
+    }
     res.status(500).json({ error: "RAG failed" });
-  }
-});
-
-router.post("/ask", async (req, res) => {
-  try {
-    const { question } = req.body;
-
-    if (!question) {
-      return res.status(400).json({ error: "Question is required" });
-    }
-
-    const result = await answerQuestion(question);
-    res.json(result);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "ASK failed" });
   }
 });
 

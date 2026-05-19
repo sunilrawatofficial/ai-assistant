@@ -1,7 +1,7 @@
-const { pineconeIndex } = require("../config/pinecone");
-const { createEmbeddings } = require("../services/embeddingService");
-const { extractTextFromPDF, chunkText } = require("../utils/pdf");
-const { PINECONE_NAMESPACE } = require("../config/constants");
+const { pineconeIndex } = require("../../config/pinecone");
+const { createEmbeddings } = require("../ai/llmService");
+const { extractTextFromPDF, chunkText } = require("../../utils/pdf");
+const { PINECONE_NAMESPACE } = require("../../config/constants");
 
 
 async function upsertDocumentsToPinecone(documents) {

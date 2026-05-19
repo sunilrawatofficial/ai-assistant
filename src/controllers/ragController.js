@@ -1,19 +1,12 @@
-const { retrieveContext } = require("../services/retrievalService");
-const { generateAnswer } = require("../services/llmService");
+const { processAgentQuery, streamAgentEvents } = require("../services/ai/agentService");
 
-async function answerRagQuestion(question) {
-  const { context, found } = await retrieveContext(question);
-  if (!found) {
-    return { answer: "I can only answer questions related to Sunil Rawat's profile, skills, experience, and projects.", context: "" };
-  }
-
-  const answer = await generateAnswer({ question, context });
+async function askAgentQuestion(assistantType, question) {
+  const answer = await processAgentQuery({ assistantType, question });
   return { answer };
 }
 
-async function answerQuestion(question) {
-  const answer = await generateAnswer({ question, context: "" });
-  return { answer };
+function createAgentEventStream(assistantType, question) {
+  return streamAgentEvents({ assistantType, question });
 }
 
-module.exports = { answerRagQuestion, answerQuestion };
+module.exports = { askAgentQuestion, createAgentEventStream };

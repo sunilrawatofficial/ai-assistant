@@ -9,8 +9,8 @@ app.use(express.json());
 const ragRoutes = require("./routes/ragRoutes");
 const pdfRoutes = require("./routes/pdfRoutes");
 
-const { createEmbeddings } = require("./services/embeddingService");
-const { upsertDocumentsToPinecone } = require("./services/pineconeService");
+const { createEmbeddings } = require("./services/ai/llmService");
+const { upsertDocumentsToPinecone } = require("./services/integrations/pineconeIngestionService");
 const { documents } = require("./data/documents");
 const PORT = process.env.PORT || 3001;
 

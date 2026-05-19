@@ -1,25 +1,18 @@
 const { pineconeIndex } = require("../config/pinecone");
-const { createEmbeddings } = require("../services/embeddingService");
-const {
-  PINECONE_NAMESPACE,
-  SIMILARITY_THRESHOLD,
-} = require("../config/constants");
+const { PINECONE_NAMESPACE, SIMILARITY_THRESHOLD } = require("../config/constants");
 
-async function retrieveFromPinecone(question) {
-  const questionEmbedding = (await createEmbeddings([question]))[0]?.embedding;
+async function retrieveFromPinecone(questionEmbedding) {
 
   if (!questionEmbedding) {
     throw new Error("Failed to generate embedding for question");
   }
-
+  
   const queryResult = await pineconeIndex.query({
     vector: questionEmbedding,
     topK: 5,
     includeMetadata: true,
     namespace: PINECONE_NAMESPACE,
   });
-
-  console.log("queryResult", JSON.stringify(queryResult, null, 2));
 
   // Get all relevant matches instead of only first match
   const relevantMatches = queryResult?.matches?.filter(
@@ -34,14 +27,11 @@ async function retrieveFromPinecone(question) {
 
   // Combine multiple contexts
   const context = relevantMatches
-    .slice(0, 3)
+    .slice(0, 5)
     .map((match) => match.metadata.text)
     .join("\n\n");
 
-  return {
-    context,
-    found: true,
-  };
+  return { context, found: true };
 }
 
 module.exports = { retrieveFromPinecone };

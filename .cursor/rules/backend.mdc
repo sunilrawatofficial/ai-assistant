@@ -1,0 +1,60 @@
+---
+description: ai-assistant backend standards — Express, RAG, agents, Pinecone
+globs: src/**/*
+alwaysApply: true
+---
+
+# Backend rules (ai-assistant)
+
+## Stack
+Node.js, Express 5, CommonJS (`require`/`module.exports`), OpenAI SDK, Pinecone v7, Multer, pdf-parse. No ORM, no auth layer, no session DB.
+
+## Layering (do not bypass)
+```
+routes → controllers → services → repositories | assistant tools
+```
+- **Routes**: HTTP wiring, body checks, try/catch, status codes. No business logic.
+- **Controllers**: Thin — delegate to services, shape JSON responses.
+- **services/ai/**: LLM, embeddings, agent orchestration, retrieval orchestration.
+- **services/integrations/**: External APIs (Pinecone upsert, OpenWeather).
+- **repositories/**: Vector retrieval only (local cosine or Pinecone query). No OpenAI calls here.
+- **assistants/**: Per-assistant `prompt`, `tools[]`, `toolDefinitions`, `toolHandlers` (handlers bridge to services/repositories).
+- **config/**: Clients and constants only.
+
+## Adding features
+- **New assistant**: `src/assistants/<name>/` (`prompt.js`, `getX.js` handler, `index.js` with `toolDefinitions` + `toolHandlers`) → register in `assistants/index.js`. `agentService` reads tools from the assistant module.
+- **New HTTP endpoint**: `routes/` → `controllers/` → existing service layer.
+- **New retrieval backend**: new file under `repositories/`, branch in `retrievalService.js` via env flag pattern (like `USE_PINECONE`).
+
+## Agent flow (preserve)
+1. Resolve assistant by `assistantType`.
+2. Filter `toolDefinitions` by `assistant.tools`.
+3. `generateChatCompletion` with system prompt + user question + tools.
+4. If `tool_calls`: run **first** call only via `toolRegistry`, then second completion with tool result in user message.
+5. Else return `message.content`.
+
+## RAG
+- Embeddings: `text-embedding-3-small` via `llmService.createEmbeddings`.
+- Pinecone namespace: `portfolio` (`PINECONE_NAMESPACE`). Metadata field: `text`.
+- Vector IDs: `doc-{i}` (startup docs), `pdf-{i}` (PDF upload).
+- `USE_PINECONE=true` → Pinecone; else in-memory local similarity on `data/documents.js`.
+
+## Code style
+- CommonJS, async/await, 2-space indent (match existing files).
+- Named exports via `module.exports = { fn }`.
+- Env via `process.env`; secrets in `.env` (never commit). Move hardcoded API keys to env when touching integration code.
+- Minimal diffs; extend patterns instead of new frameworks.
+
+## Do not
+- Put OpenAI/Pinecone logic in routes or controllers.
+- Add auth/DB layers unless explicitly requested.
+- Rewrite to TypeScript, Nest, or microservices.
+- Break the assistant → handler → retrieval separation.
+
+## Key paths
+| Area | Path |
+|------|------|
+| Entry | `src/app.js` |
+| Agent API | `POST /open-ai/rag` |
+| PDF ingest | `POST /pdf/upload` |
+| Constants | `src/config/constants.js` |
