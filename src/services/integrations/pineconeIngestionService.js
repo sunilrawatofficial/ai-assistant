@@ -6,7 +6,7 @@ const { PINECONE_NAMESPACE } = require("../../config/constants");
 
 async function upsertDocumentsToPinecone(documents) {
   if (!Array.isArray(documents) || documents.length === 0) {
-    console.warn("⚠️ No documents found. Skipping Pinecone upsert.");
+    console.warn("⚠️ [pineconeIngestionService.upsertDocumentsToPinecone] no documents found, skipping upsert");
     return;
   }
 
@@ -23,22 +23,22 @@ async function upsertDocumentsToPinecone(documents) {
     }
   }));
 
-  console.log("🔄 Creating embeddings + upserting default documents to Pinecone with vector length:", vectors.length);
+  console.log("ℹ️ [pineconeIngestionService.upsertDocumentsToPinecone] upserting default documents to Pinecone, vector count:", vectors.length);
 
   await pineconeIndex
     .namespace(PINECONE_NAMESPACE)
     .upsert({ records: vectors });
 
-  console.log("✅ successfully upserted:", vectors.length);
+  console.log("✅ [pineconeIngestionService.upsertDocumentsToPinecone] successfully upserted:", vectors.length);
 }
 
 async function upsertPDFToPinecone(filePath) {
-  console.log("📄 Processing PDF...");
+  console.log("ℹ️ [pineconeIngestionService.upsertPDFToPinecone] processing PDF");
 
   const text = await extractTextFromPDF(filePath);
-  console.log("Extracted text length:", text);
+  console.log("ℹ️ [pineconeIngestionService.upsertPDFToPinecone] extracted text length:", text.length);
   const chunks = chunkText(text);
-  console.log("Chunks created with length", chunks.length);
+  console.log("ℹ️ [pineconeIngestionService.upsertPDFToPinecone] chunks created:", chunks.length);
 
   const embeddings = await createEmbeddings(chunks);
   if (!Array.isArray(embeddings) || embeddings.length === 0) {
@@ -54,13 +54,13 @@ async function upsertPDFToPinecone(filePath) {
     }
   }));
 
-  console.log("Vectors created:", vectors.length);
+  console.log("ℹ️ [pineconeIngestionService.upsertPDFToPinecone] vectors created:", vectors.length);
 
   // 5. Store in Pinecone
   await pineconeIndex
     .namespace(PINECONE_NAMESPACE)
     .upsert({ records: vectors });
-  console.log("✅ successfully upserted:", vectors.length);
+  console.log("✅ [pineconeIngestionService.upsertPDFToPinecone] successfully upserted:", vectors.length);
 
   return { chunks: chunks.length, upserted: vectors.length };
 }

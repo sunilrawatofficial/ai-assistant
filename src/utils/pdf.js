@@ -67,7 +67,7 @@ function fixedChunk(text, chunkSize = 500) {
    for (let i = 0; i < text.length; i += chunkSize) {
       chunks.push(text.slice(i, i + chunkSize));
    }
-   console.log("✅ chunked with fixedChunk strategy");
+   console.log("✅ [pdf.fixedChunk] chunked with fixedChunk strategy");
    return chunks;
 }
 
@@ -83,7 +83,7 @@ function fixedChunkWithOverlap(text, chunkSize = 500, overlap = 100) {
       start += chunkSize - overlap;
    }
 
-  console.log("✅ chunked with fixedChunkWithOverlap strategy");
+  console.log("✅ [pdf.fixedChunkWithOverlap] chunked with fixedChunkWithOverlap strategy");
    return chunks;
 }
 
@@ -108,13 +108,13 @@ function sentenceChunk(text, maxChunkLength = 500) {
       chunks.push(current.trim());
    }
 
-   console.log("✅ chunked with sentenceChunk strategy");
+   console.log("✅ [pdf.sentenceChunk] chunked with sentenceChunk strategy");
    return chunks;
 }
 
 //4. Paragraph Chunking
 function paragraphChunk(text) {
-   console.log("✅ chunked with paragraphChunk strategy");
+   console.log("✅ [pdf.paragraphChunk] chunked with paragraphChunk strategy");
    return text
       .split(/\n\s*\n/)
       .map((p) => p.trim())
@@ -152,7 +152,7 @@ function recursiveChunk(text, chunkSize = 500) {
 
    if (current) chunks.push(current.trim());
 
-   console.log("✅ chunked with recursiveChunk strategy");
+   console.log("✅ [pdf.recursiveChunk] chunked with recursiveChunk strategy");
    return chunks;
 }
 //6. Sliding Window
@@ -163,13 +163,13 @@ function slidingWindowChunk(text, windowSize = 500, step = 250) {
       chunks.push(text.slice(i, i + windowSize));
    }
 
-   console.log("✅ chunked with slidingWindowChunk strategy");
+   console.log("✅ [pdf.slidingWindowChunk] chunked with slidingWindowChunk strategy");
    return chunks;
 }
 
 //9. Semantic Chunking (Simplified)
 function semanticChunk(text) {
-   console.log("✅ chunked with semanticChunk strategy");
+   console.log("✅ [pdf.semanticChunk] chunked with semanticChunk strategy");
    return text
       .split(/\n(?=#)|\n\s*\n/)
       .map((c) => c.trim())

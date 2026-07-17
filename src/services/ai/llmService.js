@@ -20,11 +20,11 @@ async function createEmbeddings(customDocuments) {
       input: customDocuments,
     });
 
-    console.log("🔄 Embeddings created for documents:", res.data.length);
+    console.log("✅ [llmService.createEmbeddings] embeddings created for documents:", res.data.length);
     docEmbeddings = res.data.map((d) => d.embedding);
     return res.data;
   } catch (err) {
-    console.error("❌ Embedding error:", err.message);
+    console.error("❌ [llmService.createEmbeddings] embedding error:", err.message);
     throw err;
   }
 }
@@ -36,11 +36,11 @@ function getEmbeddings() {
 async function generateChatCompletion({ messages, tools }) {
 
 
+  console.log("ℹ️ [llmService.generateChatCompletion] called with tools:", tools);
+
   const response = await openai.chat.completions.create(
     buildChatRequest({ messages, tools })
   );
-
-  console.log("\ngenerateChatCompletion() is called with message and tools:", tools);
 
   return response.choices[0].message;
 } 

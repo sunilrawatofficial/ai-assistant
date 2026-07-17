@@ -9,7 +9,7 @@ function getAssistant(assistantType) {
    if (!assistant) {
       throw new Error("Invalid assistant type");
    }
-   console.info(`\ngetAssistant() is called and returning assistant: ${assistant.toolDefinitions?.[0]?.function?.name || "unknown"}`);
+   console.info(`ℹ️ [agentService.getAssistant] returning assistant: ${assistant.toolDefinitions?.[0]?.function?.name || "unknown"}`);
    return assistant;
 }
 
@@ -18,7 +18,7 @@ function buildQuestionMessages(assistant, question) {
       { role: "system", content: assistant.prompt },
       { role: "user", content: question },
    ]
-   console.log(`\n[buildQuestionMessages()] has been called with assistant and question : ${question} and returned result`);
+   console.log(`ℹ️ [agentService.buildQuestionMessages] called with question: ${question}`);
    return result ;
 }
 
@@ -37,7 +37,7 @@ function buildMessagesWithToolResult(assistant, question, toolResult) {
 
 /** First LLM call — returns whether a tool is required and optional direct reply. */
 async function decideIfToolIsNeeded(assistant, question) {
-   console.log(`\ndecideIfToolIsNeeded() is called with [question]: ${question}`);
+   console.log(`ℹ️ [agentService.decideIfToolIsNeeded] called with question: ${question}`);
 
    let messages = buildQuestionMessages(assistant, question);
    
@@ -61,28 +61,28 @@ async function runToolAndBuildMessages(assistant, toolCall, question) {
    const args = JSON.parse(toolCall.function.arguments);
    const toolHandler = assistant.toolHandlers?.[toolName];
 
-   console.log(`\n[runToolAndBuildMessages] is called with [toolCall']: ${JSON.stringify(toolCall)} , [toolName]: ${toolName}, [question]: ${question}`);
+   console.log(`ℹ️ [agentService.runToolAndBuildMessages] called with toolName: ${toolName}, question: ${question}, toolCall: ${JSON.stringify(toolCall)}`);
 
 
    if (!toolHandler) {
       throw new Error(`Unknown tool: ${toolName}`);
    }
 
-   console.log("\n[tool args]", args);
+   console.log("ℹ️ [agentService.runToolAndBuildMessages] tool args:", args);
    const toolResult = await toolHandler(Object.values(args)[0]);
-   console.log("\n[tool result]", toolResult);
+   console.log("ℹ️ [agentService.runToolAndBuildMessages] tool result:", toolResult);
 
    return buildMessagesWithToolResult(assistant, question, toolResult);
 }
 
 async function processAgentQuery({ assistantType, question }) {
 
-   console.log("\nfunction processAgentQuery() is called");
+   console.log("ℹ️ [agentService.processAgentQuery] called");
 
    const assistant = getAssistant(assistantType);
    const decision = await decideIfToolIsNeeded(assistant, question);
 
-   console.log(`\n[decision]: ${JSON.stringify(decision)}`);
+   console.log(`ℹ️ [agentService.processAgentQuery] decision: ${JSON.stringify(decision)}`);
 
    if (!decision.needsTool) {
       return decision.directAnswer ?? "";

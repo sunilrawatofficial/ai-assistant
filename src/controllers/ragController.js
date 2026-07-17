@@ -2,13 +2,13 @@ const { processAgentQuery, streamAgentEvents } = require("../services/ai/agentSe
 
 async function askAgentQuestion(assistantType, question) {
 
-  console.log(`\n[askAgentQuestion()] called with [assistantType]: ${assistantType}, [question]: ${question}`);
+  console.log(`ℹ️ [ragController.askAgentQuestion] called with assistantType: ${assistantType}, question: ${question}`);
   const answer = await processAgentQuery({ assistantType, question });
   return { answer };
 }
 
 function createAgentEventStream(assistantType, question) {
-  console.log(`\n[createAgentEventStream()] called with [assistantType]: ${assistantType}, [question]: ${question}`);
+  console.log(`ℹ️ [ragController.createAgentEventStream] called with assistantType: ${assistantType}, question: ${question}`);
   return streamAgentEvents({ assistantType, question });
 }
 
