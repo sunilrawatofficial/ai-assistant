@@ -36,14 +36,14 @@ async function upsertPDFToPinecone(filePath) {
   console.log("📄 Processing PDF...");
 
   const text = await extractTextFromPDF(filePath);
+  console.log("Extracted text length:", text);
   const chunks = chunkText(text);
-  console.log("Chunks created:", chunks.length);
+  console.log("Chunks created with length", chunks.length);
 
   const embeddings = await createEmbeddings(chunks);
   if (!Array.isArray(embeddings) || embeddings.length === 0) {
     throw new Error("No embeddings generated for PDF chunks");
   }
-  console.log("Embeddings created:", embeddings.length);
 
   // 4. Prepare vectors
   const vectors = embeddings.map((embedding, i) => ({
