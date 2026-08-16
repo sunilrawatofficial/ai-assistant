@@ -49,7 +49,7 @@ async function extractTextFromPDF(filePath) {
   }
 }
 
-function chunkText(text, chunkSize = 400) {
+function chunkText(text, chunkSize = 500) {
   // return fixedChunk(text, chunkSize);
   return fixedChunkWithOverlap(text, chunkSize, Math.floor(chunkSize * 0.15));
   // return sentenceChunk(text, chunkSize);

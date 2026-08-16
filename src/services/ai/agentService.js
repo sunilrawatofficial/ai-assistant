@@ -88,7 +88,7 @@ async function processAgentQuery({ assistantType, question }) {
       return decision.directAnswer ?? "";
    }
 
-   const messagesWithToolResult = await runToolAndBuildMessages(
+   const messagesWithToolResult = await runToolAndBuildMessages( //this is where the tool is called and pinecone is queried
       assistant,
       decision.toolCall,
       question,
